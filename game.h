@@ -15,7 +15,7 @@ public:
 #define E_UNCOVER -3
 #define E_ENDER -4
 
-#define C_NUM1 1
+enum colorpairs { C_FLAG=1, C_NUM1 };
 
 class Game
 {
@@ -67,5 +67,4 @@ public:
     void run();
     void run_old();
     void print();
-    void printx();
 };

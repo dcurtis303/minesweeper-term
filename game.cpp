@@ -2,7 +2,6 @@
 #include <ncurses.h>
 
 #include "game.h"
-#include "colors.h"
 
 using namespace std;
 
@@ -361,72 +360,45 @@ void Game::print()
         {
             if (j % cols == 0)
                 printw("\n");
-            
-            attron(COLOR_PAIR(C_NUM1));
-            printw("%c ", grid[index(i, j)].adjacent_mine_count + '0');
-            attroff(COLOR_PAIR(C_NUM1));
-        }
-    }
-}
 
-void Game::printx()
-{
-    for (int i = 0; i < rows; i++)
-    {
-        for (int j = 0; j < cols; j++)
-        {
-            if ((i != 0) && (j % cols == 0))
-                printf("\033[0m\n");
+            int cp;
+            int ch;
 
-            char s[128];
             if (grid[index(i, j)].is_flagged)
-                snprintf(s, 128, "%s%s%s", BG_U, FG_F, TFLAG);
+            {
+                cp = C_FLAG;
+                ch = 'F';
+
+            }
             else if (!grid[index(i, j)].is_revealed)
-                snprintf(s, 128, "%s%s%c", BG_U, FG_0, '#');
+            {
+
+            }
             else if (grid[index(i, j)].is_ender)
-                snprintf(s, 128, "%s%s%c", BG_X, FG_X, 'X');
+            {
+            }
             else if (grid[index(i, j)].is_mine)
-                snprintf(s, 128, "%s%s%c", BG_U, FG_0, '*');
+            {
+            }
             else
             {
                 int d = grid[index(i, j)].adjacent_mine_count;
                 switch (d)
                 {
-                case 0:
-                    snprintf(s, 128, "%s%s%c", BG_U, FG_0, ' ');
-                    break;
-                case 1:
-                    snprintf(s, 128, "%s%s%c", BG_U, FG_1, '1');
-                    break;
-                case 2:
-                    snprintf(s, 128, "%s%s%c", BG_U, FG_2, '2');
-                    break;
-                case 3:
-                    snprintf(s, 128, "%s%s%c", BG_U, FG_3, '3');
-                    break;
-                case 4:
-                    snprintf(s, 128, "%s%s%c", BG_U, FG_4, '4');
-                    break;
-                case 5:
-                    snprintf(s, 128, "%s%s%c", BG_U, FG_5, '5');
-                    break;
-                case 6:
-                    snprintf(s, 128, "%s%s%c", BG_U, FG_6, '6');
-                    break;
-                case 7:
-                    snprintf(s, 128, "%s%s%c", BG_U, FG_7, '7');
-                    break;
-                case 8:
-                    snprintf(s, 128, "%s%s%c", BG_U, FG_8, '8');
-                    break;
+                    case 1:
+                        cp = C_NUM1;
+                        ch = '1';
                 }
             }
 
-            printf("%s%s ", s, BG_U);
+
+            attron(COLOR_PAIR(cp));
+            printw("%c ", ch);
+            attroff(COLOR_PAIR(cp));
         }
     }
-    printf("\033[0m\n");
 }
+
 
 void Game::run()
 {

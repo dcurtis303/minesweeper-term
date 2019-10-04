@@ -15,7 +15,7 @@ public:
 #define E_UNCOVER -3
 #define E_ENDER -4
 
-enum colorpairs { C_FLAG=1, C_NUM1 };
+enum colorpairs { C_FLAG=1, C_UNRVLD, C_NUM1, C_NUM2 };
 
 class Game
 {

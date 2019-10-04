@@ -57,8 +57,12 @@ Game::~Game()
 
 void Game::init_colors()
 {
+    int bkgrnd = 248;
 
-    init_pair(C_NUM1, 21, 248);
+    init_pair(C_FLAG, 21, bkgrnd);
+    init_pair(C_UNRVLD, 21, bkgrnd);
+    init_pair(C_NUM1, 21, bkgrnd);
+    init_pair(C_NUM2, 21, bkgrnd);
 }
 
 int Game::CountAdjacentMines(int i, int j)
@@ -372,7 +376,8 @@ void Game::print()
             }
             else if (!grid[index(i, j)].is_revealed)
             {
-
+                cp = C_UNRVLD;
+                ch = '#';
             }
             else if (grid[index(i, j)].is_ender)
             {

@@ -10,12 +10,24 @@ public:
     int adjacent_mine_count;
 };
 
-#define E_MINE -1
-#define E_FLAG -2
-#define E_UNCOVER -3
-#define E_ENDER -4
+enum operation
+{
+    E_MINE = -4,
+    E_FLAG,
+    E_UNCOVER,
+    E_ENDER
+};
 
-enum colorpairs { C_FLAG=1, C_UNRVLD, C_NUM1, C_NUM2 };
+enum colorpairs
+{
+    C_FLAG = 1,
+    C_UNRVLD,
+    C_NUM1,
+    C_NUM2
+};
+
+#define PRINT_OFFSET_X 4 // must be even number
+#define PRINT_OFFSET_Y 2
 
 class Game
 {
@@ -56,7 +68,9 @@ class Game
     bool IsUnrevealed(int i, int j) { return !IsRevealed(i, j); }
     bool IsFlagged(int i, int j) { return grid[index(i, j)].is_flagged; }
 
-    const int &a(int i, int j) { return grid[index(i,j)].adjacent_mine_count; }
+    const int &a(int i, int j) { return grid[index(i, j)].adjacent_mine_count; }
+
+    bool isValid(int, int, int &, int &);
 
 public:
     Game(int, int, int, int);

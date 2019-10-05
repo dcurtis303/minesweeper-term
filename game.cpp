@@ -358,12 +358,14 @@ bool Game::AllClear()
 
 void Game::print()
 {
+    move(PRINT_OFFSET_Y, PRINT_OFFSET_X);
+
     for (int i = 0; i < rows; i++)
     {
         for (int j = 0; j < cols; j++)
         {
             if (j % cols == 0)
-                printw("\n");
+                move(PRINT_OFFSET_Y + i, PRINT_OFFSET_X);
 
             int cp;
             int ch;
@@ -372,7 +374,6 @@ void Game::print()
             {
                 cp = C_FLAG;
                 ch = 'F';
-
             }
             else if (!grid[index(i, j)].is_revealed)
             {
@@ -390,12 +391,15 @@ void Game::print()
                 int d = grid[index(i, j)].adjacent_mine_count;
                 switch (d)
                 {
-                    case 1:
-                        cp = C_NUM1;
-                        ch = '1';
+                case 1:
+                    cp = C_NUM1;
+                    ch = '1';
+                    break;
+                default:
+                    cp = C_FLAG;
+                    ch = '?';
                 }
             }
-
 
             attron(COLOR_PAIR(cp));
             printw("%c ", ch);
@@ -404,11 +408,58 @@ void Game::print()
     }
 }
 
+bool Game::isValid(int x, int y, int &i, int &j)
+{
+    if (x < PRINT_OFFSET_X)
+        return false;
+
+    i = (x - PRINT_OFFSET_X) / 2;
+    j = y - PRINT_OFFSET_Y;
+
+    if ((i >= 0) && (j >= 0) && (i < cols) && (j < rows))
+        return true;
+
+    return false;
+}
 
 void Game::run()
 {
-    print();
-    getch();
+    bool playing = true;
+    int ch;
+    MEVENT event;
+
+    do
+    {
+        print();
+        ch = getch();
+        if (ch == KEY_MOUSE)
+        {
+            if (getmouse(&event) == OK)
+            {
+                int i, j;
+                if (isValid(event.x, event.y, i, j))
+                {
+                    move(0, 0);
+                    printw("select mine: %d, %d", i + 1, j + 1);
+                    clrtoeol();
+                }
+                else
+                {
+                    move(0, 0);                    
+                    clrtoeol();
+                }
+            }
+        }
+        else
+        {
+            switch (ch)
+            {
+            case 'q':
+                playing = false;
+                break;
+            }
+        }
+    } while (playing);
 }
 
 void Game::run_old()

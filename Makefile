@@ -7,7 +7,7 @@ minesweeper-ncurses: main.o game.o
 main.o: main.cpp
 	$(CC) $(CFLAGS) -c main.cpp
 
-game.o: game.cpp
+game.o: game.cpp game.h
 	$(CC) $(CFLAGS) -c game.cpp
 
 

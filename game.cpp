@@ -3,7 +3,21 @@
 
 #include "game.h"
 
-using namespace std;
+CPDef cpdef[] = {
+    {C_FLAG, 124, CBKGND2},
+    {C_UNRVLD, CBKGND, CBKGND2},
+    {C_ENDER, CBKGND, 52},
+    {C_MINE, 232, CBKGND},
+    {C_NUM0, CBKGND, CBKGND},
+    {C_NUM1, 21, CBKGND},
+    {C_NUM2, 28, CBKGND},
+    {C_NUM3, 88, CBKGND},
+    {C_NUM4, 19, CBKGND},
+    {C_NUM5, 52, CBKGND},
+    {C_NUM6, 29, CBKGND},
+    {C_NUM7, 16, CBKGND},
+    {C_NUM8, 236, CBKGND}};
+int cpdef_size = sizeof(cpdef) / sizeof(CPDef);
 
 Game::Game(int r, int c, int m, int s)
 {
@@ -48,6 +62,10 @@ Game::Game(int r, int c, int m, int s)
         for (int j = 0; j < cols; j++)
             if (!IsMine(i, j))
                 grid[index(i, j)].adjacent_mine_count = CountAdjacentMines(i, j);
+
+    for (int i = 0; i < rows; i++)
+        for (int j = 0; j < cols; j++)
+            grid[index(i, j)].is_revealed = false;
 }
 
 Game::~Game()
@@ -57,12 +75,8 @@ Game::~Game()
 
 void Game::init_colors()
 {
-    int bkgrnd = 248;
-
-    init_pair(C_FLAG, 21, bkgrnd);
-    init_pair(C_UNRVLD, 21, bkgrnd);
-    init_pair(C_NUM1, 21, bkgrnd);
-    init_pair(C_NUM2, 21, bkgrnd);
+    for (int i = 0; i < cpdef_size; i++)
+        init_pair(cpdef[i].cp, cpdef[i].fg, cpdef[i].bg);
 }
 
 int Game::CountAdjacentMines(int i, int j)
@@ -301,26 +315,26 @@ void Game::RevealAdjacentTiles(int i, int j)
 
 void Game::SetTile(int i, int j, char value, const char *who)
 {
-    const char *s;
+    //const char *s;
 
     switch (value)
     {
     case E_UNCOVER:
         grid[index(i, j)].is_revealed = true;
-        s = "Uncover";
+        //s = "Uncover";
         break;
     case E_FLAG:
         grid[index(i, j)].is_flagged = true;
-        s = "Flag";
+        //s = "Flag";
         break;
     case E_ENDER:
         grid[index(i, j)].is_ender = true;
-        s = "End Mine";
+        //s = "End Mine";
         break;
     }
 
     changes++;
-    printf("(%d, %d) = %s <- %s\n", i, j, s, who);
+    //printf("(%d, %d) = %s <- %s\n", i, j, s, who);
 }
 
 void Game::RandomPress(int &rpi, int &rpj)
@@ -382,23 +396,19 @@ void Game::print()
             }
             else if (grid[index(i, j)].is_ender)
             {
+                cp = C_ENDER;
+                ch = 'X';
             }
             else if (grid[index(i, j)].is_mine)
             {
+                cp = C_MINE;
+                ch = '*';
             }
             else
             {
-                int d = grid[index(i, j)].adjacent_mine_count;
-                switch (d)
-                {
-                case 1:
-                    cp = C_NUM1;
-                    ch = '1';
-                    break;
-                default:
-                    cp = C_FLAG;
-                    ch = '?';
-                }
+                int d = a(i, j); //grid[index(i, j)].adjacent_mine_count;
+                cp = C_NUM0 + d;
+                ch = '0' + d;
             }
 
             attron(COLOR_PAIR(cp));
@@ -406,6 +416,7 @@ void Game::print()
             attroff(COLOR_PAIR(cp));
         }
     }
+    refresh();
 }
 
 bool Game::isValid(int x, int y, int &i, int &j)
@@ -413,10 +424,10 @@ bool Game::isValid(int x, int y, int &i, int &j)
     if (x < PRINT_OFFSET_X)
         return false;
 
-    i = (x - PRINT_OFFSET_X) / 2;
-    j = y - PRINT_OFFSET_Y;
+    j = (x - PRINT_OFFSET_X) / 2;
+    i = y - PRINT_OFFSET_Y;
 
-    if ((i >= 0) && (j >= 0) && (i < cols) && (j < rows))
+    if ((i >= 0) && (j >= 0) && (i < rows) && (j < cols))
         return true;
 
     return false;
@@ -431,6 +442,7 @@ void Game::run()
     do
     {
         print();
+        
         ch = getch();
         if (ch == KEY_MOUSE)
         {
@@ -439,14 +451,19 @@ void Game::run()
                 int i, j;
                 if (isValid(event.x, event.y, i, j))
                 {
-                    move(0, 0);
-                    printw("select mine: %d, %d", i + 1, j + 1);
-                    clrtoeol();
-                }
-                else
-                {
-                    move(0, 0);                    
-                    clrtoeol();
+                    if (IsUnrevealed(i, j) && !IsFlagged(i, j))
+                    {
+                        SetTile(i, j, E_UNCOVER, "Select");
+
+                        if (IsMine(i, j))
+                        {
+                            SetTile(i, j, E_ENDER, "Pressed mine");
+                            //playing = false;
+                            //break;
+                        }
+
+                        print();
+                    }
                 }
             }
         }
@@ -459,49 +476,12 @@ void Game::run()
                 break;
             }
         }
+
+        MatchBlank();
+        MatchUnrevealed();
+        MatchFlagged();
+        MatchPatterns1();
+        MatchPatterns2();
+
     } while (playing);
-}
-
-void Game::run_old()
-{
-    bool playing = true;
-    int presses = 0;
-
-    cout << "Start..." << endl;
-
-    while (playing)
-    {
-        int rpi, rpj;
-        RandomPress(rpi, rpj);
-        presses++;
-
-        if (IsMine(rpi, rpj))
-        {
-            SetTile(rpi, rpj, E_ENDER, "Pressed mine");
-            playing = false;
-            break;
-        }
-
-        for (int i = 1; playing; i++)
-        {
-            int c = changes;
-            printf("Press: %d, Iteration: %d, total changes: %d\n", presses, i, c);
-
-            MatchBlank();
-            MatchUnrevealed();
-            MatchFlagged();
-            MatchPatterns1();
-            MatchPatterns2();
-
-            if (c == changes)
-                break;
-
-            if (AllClear())
-            {
-                printf("Game Won! Total changes: %d\n", changes);
-                playing = false;
-            }
-        }
-    }
-    cout << "Finish..." << endl;
 }

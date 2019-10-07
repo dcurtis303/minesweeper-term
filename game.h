@@ -1,5 +1,8 @@
 #include <cstdlib>
 
+#ifndef GAME_H_
+#define GAME_H_
+
 class Tile
 {
 public:
@@ -18,13 +21,32 @@ enum operation
     E_ENDER
 };
 
-enum colorpairs
+enum ColorPairs
 {
     C_FLAG = 1,
     C_UNRVLD,
+    C_ENDER,
+    C_MINE,
+    C_NUM0,
     C_NUM1,
-    C_NUM2
+    C_NUM2,
+    C_NUM3,
+    C_NUM4,
+    C_NUM5,
+    C_NUM6,
+    C_NUM7,
+    C_NUM8
 };
+
+#define CBKGND 246
+#define CBKGND2 242
+
+struct CPDef
+{
+    ColorPairs cp;
+    int fg;
+    int bg;
+}; 
 
 #define PRINT_OFFSET_X 4 // must be even number
 #define PRINT_OFFSET_Y 2
@@ -68,17 +90,18 @@ class Game
     bool IsUnrevealed(int i, int j) { return !IsRevealed(i, j); }
     bool IsFlagged(int i, int j) { return grid[index(i, j)].is_flagged; }
 
-    const int &a(int i, int j) { return grid[index(i, j)].adjacent_mine_count; }
+    int &a(int i, int j) { return grid[index(i, j)].adjacent_mine_count; }
 
     bool isValid(int, int, int &, int &);
+    void print();
 
 public:
     Game(int, int, int, int);
     ~Game();
 
     void init_colors();
-
     void run();
-    void run_old();
-    void print();
+
 };
+
+#endif // GAME_H_

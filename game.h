@@ -100,7 +100,7 @@ public:
     ~Game();
 
     void init_colors();
-    void run();
+    bool run();
 
 };
 

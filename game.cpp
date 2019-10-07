@@ -433,23 +433,25 @@ bool Game::isValid(int x, int y, int &i, int &j)
     return false;
 }
 
-void Game::run()
+bool Game::run()
 {
+    bool quit = false;
     bool playing = true;
+    bool ender_found = false;
     int ch;
     MEVENT event;
 
     do
     {
         print();
-        
+
         ch = getch();
         if (ch == KEY_MOUSE)
         {
             if (getmouse(&event) == OK)
             {
                 int i, j;
-                if (isValid(event.x, event.y, i, j))
+                if ((!ender_found) && (isValid(event.x, event.y, i, j)))
                 {
                     if (IsUnrevealed(i, j) && !IsFlagged(i, j))
                     {
@@ -458,8 +460,7 @@ void Game::run()
                         if (IsMine(i, j))
                         {
                             SetTile(i, j, E_ENDER, "Pressed mine");
-                            //playing = false;
-                            //break;
+                            ender_found = true;
                         }
 
                         print();
@@ -473,15 +474,30 @@ void Game::run()
             {
             case 'q':
                 playing = false;
+                quit = true;
+                break;
+            case 'n':
+                playing = false;
+                quit = false;
                 break;
             }
         }
 
-        MatchBlank();
-        MatchUnrevealed();
-        MatchFlagged();
-        MatchPatterns1();
-        MatchPatterns2();
+        if (!ender_found)
+        {
+            int ct;
+            do
+            {
+                ct = changes;
+                MatchBlank();
+                MatchUnrevealed();
+                MatchFlagged();
+                MatchPatterns1();
+                MatchPatterns2();
+            } while (ct != changes);
+        }
 
     } while (playing);
+
+    return quit;
 }

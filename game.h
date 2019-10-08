@@ -23,7 +23,8 @@ enum operation
 
 enum ColorPairs
 {
-    C_FLAG = 1,
+    C_MENU = 1,
+    C_FLAG,
     C_UNRVLD,
     C_ENDER,
     C_MINE,
@@ -37,9 +38,6 @@ enum ColorPairs
     C_NUM7,
     C_NUM8
 };
-
-#define CBKGND 246
-#define CBKGND2 242
 
 struct CPDef
 {

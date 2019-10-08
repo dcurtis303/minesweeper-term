@@ -3,7 +3,11 @@
 
 #include "game.h"
 
+#define CBKGND 246
+#define CBKGND2 242
+
 CPDef cpdef[] = {
+    {C_MENU, 255, CBKGND2},
     {C_FLAG, 124, CBKGND2},
     {C_UNRVLD, CBKGND, CBKGND2},
     {C_ENDER, CBKGND, 52},
@@ -376,9 +380,15 @@ int Game::CountAllFlagged()
 void Game::print()
 {
     move(0, 0);
-
     printw(" %d / %d, %d", CountAllFlagged(), mines, clicks);
     clrtoeol();
+
+    attron(COLOR_PAIR(C_MENU));
+    move(0, 50);
+    printw("NEW");
+    move(0, 55);
+    printw("QUIT");
+    attroff(COLOR_PAIR(C_MENU));
 
     move(PRINT_OFFSET_Y, PRINT_OFFSET_X);
 
@@ -460,6 +470,16 @@ bool Game::run()
         {
             if (getmouse(&event) == OK)
             {
+                if (event.y == 0 && event.x >= 50 && event.x <= 60)
+                {
+                    playing = false;
+                    if (event.x >= 55)
+                        quit = true;
+                    else
+                        quit = false;
+                    break;
+                }
+
                 int i, j;
                 if (!ender_found)
                 {

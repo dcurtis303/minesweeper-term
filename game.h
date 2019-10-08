@@ -57,7 +57,9 @@ class Game
     int rows, irow;
     int cols, icol;
     int mines;
+    int seed;
     int changes;
+    int clicks;
     int lau1[8][2];
     int lau2[8][2];
 
@@ -79,6 +81,7 @@ class Game
     void SetTile(int, int, char, const char *);
     void RandomPress(int &, int &);
     bool AllClear();
+    int CountAllFlagged();
 
     int index(int x, int y) { return x * cols + y; };
     int rrng(int r) { return (float)rand() / RAND_MAX * r; }

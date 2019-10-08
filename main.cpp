@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
     mousemask(BUTTON1_CLICKED, NULL);
     start_color();
 
-    bool quit = false;
+    bool quit;
     do {
         Game game(16, 30, 99, time(NULL));
         quit = game.run();

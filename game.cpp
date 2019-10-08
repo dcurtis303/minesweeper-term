@@ -33,8 +33,8 @@ Game::Game(int r, int c, int m, int s)
 
     init_colors();
 
-    srand(s);
-    printf("Seed: %d\n", s);
+    seed = s;
+    srand(seed);
 
     for (int i = 0; i < mines; i++)
     {
@@ -50,13 +50,6 @@ Game::Game(int r, int c, int m, int s)
             }
         }
     }
-
-    int mcnt = 0;
-    for (int i = 0; i < rows; i++)
-        for (int j = 0; j < cols; j++)
-            if (IsMine(i, j))
-                mcnt += 1;
-    printf("Mine Count: %d\n", mcnt);
 
     for (int i = 0; i < rows; i++)
         for (int j = 0; j < cols; j++)
@@ -370,8 +363,23 @@ bool Game::AllClear()
     return true;
 }
 
+int Game::CountAllFlagged()
+{
+    int c = 0;
+    for (int i = 0; i < rows; i++)
+        for (int j = 0; j < cols; j++)
+            if (IsUnrevealed(i, j) && IsFlagged(i, j))
+                c++;
+    return c;
+}
+
 void Game::print()
 {
+    move(0, 0);
+
+    printw(" %d / %d, %d", CountAllFlagged(), mines, clicks);
+    clrtoeol();
+
     move(PRINT_OFFSET_Y, PRINT_OFFSET_X);
 
     for (int i = 0; i < rows; i++)
@@ -441,6 +449,8 @@ bool Game::run()
     int ch;
     MEVENT event;
 
+    clicks = 0;
+
     do
     {
         print();
@@ -451,19 +461,28 @@ bool Game::run()
             if (getmouse(&event) == OK)
             {
                 int i, j;
-                if ((!ender_found) && (isValid(event.x, event.y, i, j)))
+                if (!ender_found)
                 {
-                    if (IsUnrevealed(i, j) && !IsFlagged(i, j))
+                    if (isValid(event.x, event.y, i, j))
                     {
-                        SetTile(i, j, E_UNCOVER, "Select");
-
-                        if (IsMine(i, j))
+                        if (IsUnrevealed(i, j) && !IsFlagged(i, j))
                         {
-                            SetTile(i, j, E_ENDER, "Pressed mine");
-                            ender_found = true;
-                        }
+                            SetTile(i, j, E_UNCOVER, "Select");
+                            clicks++;
 
-                        print();
+                            if (IsMine(i, j))
+                            {
+                                SetTile(i, j, E_ENDER, "Pressed mine");
+                                ender_found = true;
+                            }
+
+                            print();
+                        }
+                    }
+                    else
+                    {
+                        playing = false;
+                        quit = false;
                     }
                 }
             }
@@ -473,10 +492,12 @@ bool Game::run()
             switch (ch)
             {
             case 'q':
+            case 'Q':
                 playing = false;
                 quit = true;
                 break;
             case 'n':
+            case 'N':
                 playing = false;
                 quit = false;
                 break;

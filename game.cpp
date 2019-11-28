@@ -1,4 +1,5 @@
 #include <iostream>
+#include <unistd.h>
 #include <ncurses.h>
 
 #include "game.h"
@@ -465,6 +466,7 @@ bool Game::run()
     {
         print();
 
+        usleep(10);
         ch = getch();
         if (ch == KEY_MOUSE)
         {

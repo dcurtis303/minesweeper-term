@@ -311,7 +311,7 @@ void Game::RevealAdjacentTiles(int i, int j)
                 SetTile(ip, jp, E_UNCOVER, "RevealAdjacentTiles");
 }
 
-void Game::SetTile(int i, int j, char value, const char *who)
+void Game::SetTile(int i, int j, int value, const char *who)
 {
     //const char *s;
 

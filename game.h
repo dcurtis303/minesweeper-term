@@ -76,7 +76,7 @@ class Game
     int CountAdjacentUnrevealed(int, int);
     int CountAdjacentFlagged(int, int);
     void FlagAdjacentMines(int, int);
-    void SetTile(int, int, char, const char *);
+    void SetTile(int, int, int, const char *);
     void RandomPress(int &, int &);
     bool AllClear();
     int CountAllFlagged();
